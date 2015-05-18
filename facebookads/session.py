@@ -63,8 +63,8 @@ class FacebookSession(object):
         params = {
             'access_token': self.access_token
         }
-        if app_secret:
-            params['appsecret_proof'] = self._gen_appsecret_proof()
+        # if app_secret:
+        #     params['appsecret_proof'] = self._gen_appsecret_proof()
         self.requests.params.update(params)
 
     def _gen_appsecret_proof(self):
