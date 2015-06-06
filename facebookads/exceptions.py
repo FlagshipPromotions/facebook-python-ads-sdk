@@ -35,7 +35,7 @@ class FacebookError(Exception):
     pass
 
 
-class FacebookRequestError(FacebookError):
+class FacebookRequestError(Exception):
     """
     Raised when an api request fails. Returned by error() method on a
     FacebookResponse object returned through a callback function (relevant
