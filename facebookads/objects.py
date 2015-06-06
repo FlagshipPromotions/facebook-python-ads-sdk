@@ -157,7 +157,7 @@ class EdgeIterator(object):
             return self._target_objects_class()
 
     def build_objects_from_response(self, response):
-        if 'data' in response and isinstance(response['data'], list):
+        if 'data' in response:
             ret = []
             if isinstance(response['data'], list):
                 for json_obj in response['data']:
@@ -413,7 +413,9 @@ class AbstractCrudObject(AbstractObject):
         api = self.get_api()
         if not api:
             raise FacebookBadObjectError(
-                "%s does not yet have an associated api object."
+                "%s does not yet have an associated api object.\n"
+                "Did you forget to instantiate an API session with: "
+                "FacebookAdsApi.init(app_id, app_secret, access_token)"
                 % self.__class__.__name__
             )
 
@@ -851,7 +853,7 @@ class AdAccount(CannotCreate, CannotDelete, AbstractCrudObject):
         partner = 'partner'
         spend_cap = 'spend_cap'
         tax_id_status = 'tax_id_status'
-        timezone_id = 'timezone_id'
+        timezon_id = 'timezone_id'
         timezone_name = 'timezone_name'
         timezone_offset_hours_utc = 'timezone_offset_hours_utc'
         tos_accepted = 'tos_accepted'
@@ -2013,6 +2015,7 @@ class TargetingSearch(AbstractObject):
         education = 'adeducationschool'
         employer = 'adworkemployer'
         geolocation = 'adgeolocation'
+        geometadata = 'adgeolocationmeta'
         interest = 'adinterest'
         interest_suggestion = 'adinterestsuggestion'
         interest_validate = 'adinterestvalid'
@@ -2046,10 +2049,21 @@ class TargetingSearch(AbstractObject):
         ).json()
 
         ret_val = []
-        for item in response['data']:
-            search_obj = TargetingSearch()
-            search_obj.update(item)
-            ret_val.append(search_obj)
+        if response:
+            keys = response['data']
+            # The response object can be either a dictionary of dictionaries
+            # or a dictionary of lists.
+            if isinstance(keys, list):
+                for item in keys:
+                    search_obj = TargetingSearch()
+                    search_obj.update(item)
+                    ret_val.append(search_obj)
+            elif isinstance(keys, dict):
+                for item in keys:
+                    search_obj = TargetingSearch()
+                    search_obj.update(keys[item])
+                    if keys[item]:
+                        ret_val.append(search_obj)
         return ret_val
 
 
@@ -2058,9 +2072,11 @@ class TargetingSpecsField(object):
     age_max = 'age_max'
     age_min = 'age_min'
     behaviors = 'behaviors'
+    cities = 'cities'
     college_years = 'college_years'
     conjunctive_user_adclusters = 'conjunctive_user_adclusters'
     connections = 'connections'
+    countries = 'countries'
     custom_audiences = 'custom_audiences'
     dynamic_audience_ids = 'dynamic_audience_ids'
     education_majors = 'education_majors'
@@ -2091,6 +2107,7 @@ class TargetingSpecsField(object):
     office_type = 'office_type'
     page_types = 'page_types'
     politics = 'politics'
+    regions = 'regions'
     relationship_statuses = 'relationship_statuses'
     user_adclusters = 'user_adclusters'
     user_device = 'user_device'
@@ -2522,6 +2539,10 @@ class Insights(CannotCreate, CannotDelete, CannotUpdate, AbstractCrudObject):
         age = 'age'
         country = 'country'
         gender = 'gender'
+        hourly_stats_aggregated_by_advertiser_time_zone = \
+            'hourly_stats_aggregated_by_advertiser_time_zone'
+        hourly_stats_aggregated_by_audience_time_zone = \
+            'hourly_stats_aggregated_by_audience_time_zone'
         impression_device = 'impression_device'
         placement = 'placement'
 
